@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import {Grid, Image, Label, Button, Container, Input, Segment, List, Confirm, Icon} from 'semantic-ui-react';
 import './main.css'
 
+import TimePicker from 'react-time-picker';
+
 class Main extends Component {
     constructor() {
         super();
@@ -10,13 +12,13 @@ class Main extends Component {
             mapImageTemp: '',
             safeDistance: 10,
             active: true,
-            SOC1: "123123",
+            SOC: "23",
             SOC2: "123123",
-            SOC3: "powi0",
-            SOC4: "1asd2",
-            SOC5: "1212313",
+            TDT: "powi0",
             openOverrideDialogue: false,
             allowOverride: false,
+            time: '10:00',
+            frequency: 0,
 
         }
         this.readFile = this.readFile.bind(this)
@@ -57,6 +59,23 @@ class Main extends Component {
     handleConfirm = () => this.setState({ allowOverride: true, openOverrideDialogue: false })
     handleCancel = () => this.setState({ allowOverride: false, openOverrideDialogue: false })
 
+    onChangeTime     = time => this.setState({ time })
+
+    onChangeFrequency     = (e) => this.setState({ frequency: e.target.value })
+
+    checkColor = (x) => {
+        if(x<=25)
+            return "red"
+        else
+            if(x>25&&x<=50)
+                return "orange"
+        else
+            if(x>50&&x<=75)
+                return "yellow"
+        else
+            return "green"                    
+
+    }
 	
 	render() {
 		return(
@@ -99,16 +118,6 @@ class Main extends Component {
                         </Container>
                     </Grid.Row>
                     <br/>
-                {/* 3nd row */}
-                    <Grid.Row>
-                        <Container textAlign="left">
-                        <Label  pointing="right" size="large" basic >SOURCE STATIONS :</Label> 
-                        
-                        <Button disabled={!this.state.active}>Select</Button>
-                        <Button primary disabled={!this.state.active}>Finalize</Button>
-                        </Container>
-                    </Grid.Row>
-                    <br/>
                 {/* 4nd row */}
                     <Grid.Row>
                         <Container textAlign="left">
@@ -138,7 +147,7 @@ class Main extends Component {
                             <Label size="big" pointing="below" basic>EMERGENCY BUTTON</Label>
                             <br />
                             <Button toggle size="big" circular active= {!this.state.active} negative={this.state.active} onClick={this.handleToggle}>
-                                 {this.state.active ? "Pause" : "Play"}
+                                 {this.state.active ? "Stop" : "Start"}
                             </Button>
 
                         </Container>
@@ -147,14 +156,28 @@ class Main extends Component {
                         <Segment raised>
                         <Container textAlign="center">
                             <Label size="medium" basic>AGV DATA</Label>
-                            <br />
-                            <List as='ul'>
-                                <List.Item as='li'><b>SOC1 : </b> {this.state.SOC1} </List.Item>
-                                <List.Item as='li'><b>SOC2 : </b> {this.state.SOC2} </List.Item>
-                                <List.Item as='li'><b>SOC3 : </b> {this.state.SOC3} </List.Item>
-                                <List.Item as='li'><b>SOC4 : </b> {this.state.SOC4} </List.Item>
-                                <List.Item as='li'><b>SOC5 : </b> {this.state.SOC5} </List.Item>
-                            </List>
+                            <br /> <br />
+                            <Grid columns={3} divided>
+                                 <Grid.Row>
+                                     <Grid.Column>
+                                        <Label size="big" basic pointing="below">SOC</Label>
+                                        <br />
+                                        <Label basic color={this.checkColor(this.state.SOC)} size="massive">{this.state.SOC}%</Label>
+                                    </Grid.Column>
+                                     <Grid.Column>
+                                        <Label size="big" basic pointing="below">SOC2</Label>
+                                        <br />
+                                        <Label basic size="massive">{this.state.SOC2}</Label>
+                                        <br /> <br />
+                                        <Button primary>RESET</Button>
+                                     </Grid.Column>
+                                    <Grid.Column>
+                                        <Label size="big" basic pointing="below">Total Distance Travlled</Label>
+                                        <br />
+                                        <Label basic size="massive">{this.state.TDT}</Label>
+                                    </Grid.Column>
+                                </Grid.Row>
+                            </Grid>
 
                         </Container>
                         </Segment>
@@ -168,22 +191,33 @@ class Main extends Component {
                                 onCancel={this.handleCancel}
                                 onConfirm={this.handleConfirm}
                             />
+                            
                         </Container>
-                        </Segment>
-                        
+                        <br />
+                        <Container>
                         <Icon name='arrow up'  disabled={!this.state.allowOverride} size="big"></Icon>
                         <br/>
-
-                        <Icon name='arrow left' size="big" disabled={!this.state.allowOverride}></Icon>
-                        <Icon name='circle' size="small"></Icon>
-                        <Icon name='arrow right' size="big" disabled={!this.state.allowOverride}></Icon>
-                        <br/>
-                        <Icon name='arrow down' size="big" disabled={!this.state.allowOverride}></Icon>
-                        <br/> <br />
-
                         <Icon name='undo' size="big" bordered circular disabled={!this.state.allowOverride}></Icon>
+                        <Icon name='circle' size="small"></Icon>
                         <Icon name='redo' size="big" bordered circular disabled={!this.state.allowOverride}></Icon>
-
+                        <br />
+                        <Icon name='arrow down' size="big" disabled={!this.state.allowOverride}></Icon>
+                        <br/>
+                        </Container>
+                        
+                        </Segment>
+                        <Segment>
+                        <TimePicker
+                            onChange={this.onChangeTime}
+                            value={this.state.time}
+                        />
+                       {" "}
+                        <Input 
+                            label="Enter frequency"
+                             onChange={this.onChangeFrequency}
+                             value={this.state.frequency}   
+                        />
+                        </Segment>
                     </Grid.Column>
                 </Grid>
             </div>
