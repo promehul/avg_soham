@@ -1,5 +1,6 @@
+import axios from 'axios';
 import React, { Component } from 'react';
-import {Grid, Image, Label, Button, Container, Input, Segment, List, Confirm, Icon} from 'semantic-ui-react';
+import {Grid, Image, Label, Button, Container, Input, Segment, Confirm, Icon, Radio} from 'semantic-ui-react';
 import './main.css'
 
 import TimePicker from 'react-time-picker';
@@ -19,6 +20,7 @@ class Main extends Component {
             allowOverride: false,
             time: '10:00',
             frequency: 0,
+            installationMode: false,
 
         }
         this.readFile = this.readFile.bind(this)
@@ -55,7 +57,14 @@ class Main extends Component {
     handleToggle = () =>
     this.setState((prevState) => ({ active: !prevState.active }))
 
-    openConfirmDialogue = () => this.setState({ openOverrideDialogue: true })
+    openConfirmDialogue = () => {
+        if(this.state.allowOverride === false){ 
+            this.setState({ openOverrideDialogue: true })
+        }
+        else {
+            this.setState({ allowOverride: false })
+        }
+    }
     handleConfirm = () => this.setState({ allowOverride: true, openOverrideDialogue: false })
     handleCancel = () => this.setState({ allowOverride: false, openOverrideDialogue: false })
 
@@ -75,6 +84,32 @@ class Main extends Component {
         else
             return "green"                    
 
+    }
+
+    checkOverrideColor = (x) => {
+        if(x === true)
+            return "green"
+        else
+            return "red"                        
+
+    }
+
+    toggleInstallationMode = () => this.setState((prevState) => ({ installationMode: !prevState.installationMode }))
+
+    testRequest = () => {
+        console.log("yu")
+        axios({
+            method: 'post',
+            url: 'http://localhost:8080/',
+            data: {
+              soc: 'Finn',
+            }
+          });
+
+        //   axios.get('http://127.0.0.1:8080/')
+        //   .then(response => {
+        //     console.log(response.data);
+        //   });  
     }
 	
 	render() {
@@ -100,11 +135,11 @@ class Main extends Component {
                         <Label  pointing="right" size="large" basic >MAP :</Label> 
                         <input 
                             type="file" 
-                            accept="image/png, image/jpeg" 
+                            accept="image/png, image/jpeg, image/jpg" 
                             onChange={this.handleImageChange}>
                         </input>
 
-                        <Button onClick={this.handleChange} primary disabled={!this.state.active}>Upload</Button>
+                        <Button onClick={this.handleChange} primary disabled={!this.state.active || this.state.installationMode}>Upload</Button>
                         </Container>
                     </Grid.Row>
                     <br/>
@@ -113,8 +148,8 @@ class Main extends Component {
                         <Container textAlign="left">
                         <Label  pointing="right" size="large" basic>LOCALIZE AGV :</Label> 
                         
-                        <Button disabled={!this.state.active}>Select</Button>
-                        <Button primary disabled={!this.state.active}>Finalize</Button>
+                        <Button disabled={!this.state.active || this.state.installationMode}>Select</Button>
+                        <Button primary disabled={!this.state.active || this.state.installationMode}>Finalize</Button>
                         </Container>
                     </Grid.Row>
                     <br/>
@@ -123,23 +158,26 @@ class Main extends Component {
                         <Container textAlign="left">
                         <Label  pointing="right" size="large" basic >DESTINATIONS :</Label> 
                         
-                        <Button disabled={!this.state.active}>Select</Button>
-                        <Button primary disabled={!this.state.active}>Finalize</Button>
+                        <Button disabled={!this.state.active || this.state.installationMode}>Select</Button>
+                        <Button primary disabled={!this.state.active || this.state.installationMode}>Finalize</Button>
                         </Container>
                     </Grid.Row>
                     <br/>
-                {/* 5nd row */}
-                    <Grid.Row>
-                    <Container textAlign="left">
-                        <Label  pointing="right" size="large" basic >SAFE OBSTACLE DIST :</Label>
-                        <Input  
-                        placeholder='Enter' 
-                        value={this.state.safeDistance} 
-                        disabled={!this.state.active}
-                        onChange={this.handleSafeDistanceChange}/>
-                        </Container>
-                    </Grid.Row>
                     </Segment>
+                    <Segment>
+                        <TimePicker
+                            onChange={this.onChangeTime}
+                            value={this.state.time}
+                            disabled={!this.state.active || this.state.installationMode}
+                        />
+                       {" "}
+                        <Input 
+                            label="Enter frequency"
+                             onChange={this.onChangeFrequency}
+                             value={this.state.frequency}   
+                             disabled={!this.state.active || this.state.installationMode}
+                        />
+                        </Segment>
                     </Grid.Column>
                     <Grid.Column>
                         <Segment raised>
@@ -169,10 +207,10 @@ class Main extends Component {
                                         <br />
                                         <Label basic size="massive">{this.state.SOC2}</Label>
                                         <br /> <br />
-                                        <Button primary>RESET</Button>
+                                        <Button primary onClick={this.testRequest} disabled={!this.state.active || this.state.installationMode}>RESET</Button>
                                      </Grid.Column>
                                     <Grid.Column>
-                                        <Label size="big" basic pointing="below">Total Distance Travlled</Label>
+                                        <Label size="big" basic pointing="below">TDT</Label>
                                         <br />
                                         <Label basic size="massive">{this.state.TDT}</Label>
                                     </Grid.Column>
@@ -182,42 +220,54 @@ class Main extends Component {
                         </Container>
                         </Segment>
                         <Segment raised>
-                        <Container >
-                            <Label size="medium" basic>MANUAL OPERATION</Label>
-                            <br /> <br />
-                           <Button circular negative onClick={this.openConfirmDialogue} disabled={!this.state.active}>OVERRIDE</Button>
-                           <Confirm
-                                open={this.state.openOverrideDialogue}
-                                onCancel={this.handleCancel}
-                                onConfirm={this.handleConfirm}
-                            />
+                            <Grid columns={2} divided>
+                                <Grid.Column>
+                                    <Label size="medium" basic>INSTALLATION MODE</Label>
+                                     <br /><br /><br /><br />
+
+                                     <Radio 
+                                        toggle 
+                                        checked={this.state.installationMode} 
+                                        onChange={this.toggleInstallationMode} 
+                                        disabled={!this.state.active || this.state.allowOverride}> 
+                                    </Radio>    
+                                </Grid.Column>
+                                
+                                <Grid.Column>
+                                         <Container >
+                                         <Label size="medium" basic>MANUAL OPERATION</Label>
+                                        <br /> <br />
+                                     <Button 
+                                        circular 
+                                        color={this.checkOverrideColor(this.state.allowOverride)} 
+                                        onClick={this.openConfirmDialogue} 
+                                        disabled={!this.state.active || this.state.installationMode}>
+                                        OVERRIDE</Button>
+                                     <Confirm
+                                        open={this.state.openOverrideDialogue}
+                                        onCancel={this.handleCancel}
+                                        onConfirm={this.handleConfirm}
+                                    />
                             
-                        </Container>
-                        <br />
-                        <Container>
-                        <Icon name='arrow up'  disabled={!this.state.allowOverride} size="big"></Icon>
+                                     </Container>
+                                    <br />
+                                     <Container>
+                        <Icon name='arrow up'  disabled={!this.state.allowOverride && !this.state.installationMode} size="big"></Icon>
                         <br/>
-                        <Icon name='undo' size="big" bordered circular disabled={!this.state.allowOverride}></Icon>
+                        <Icon name='undo' size="big" bordered circular disabled={!this.state.allowOverride && !this.state.installationMode}></Icon>
                         <Icon name='circle' size="small"></Icon>
-                        <Icon name='redo' size="big" bordered circular disabled={!this.state.allowOverride}></Icon>
+                        <Icon name='redo' size="big" bordered circular disabled={!this.state.allowOverride && !this.state.installationMode}></Icon>
                         <br />
-                        <Icon name='arrow down' size="big" disabled={!this.state.allowOverride}></Icon>
+                        <Icon name='arrow down' size="big" disabled={!this.state.allowOverride && !this.state.installationMode}></Icon>
                         <br/>
                         </Container>
+                                </Grid.Column>
+                            </Grid>
+
+                        
                         
                         </Segment>
-                        <Segment>
-                        <TimePicker
-                            onChange={this.onChangeTime}
-                            value={this.state.time}
-                        />
-                       {" "}
-                        <Input 
-                            label="Enter frequency"
-                             onChange={this.onChangeFrequency}
-                             value={this.state.frequency}   
-                        />
-                        </Segment>
+                       
                     </Grid.Column>
                 </Grid>
             </div>
