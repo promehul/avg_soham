@@ -28,13 +28,31 @@ class Main extends Component {
 		this.readFile = this.readFile.bind(this);
 	}
 
-	// componentDidMount() {
-	//     const {endpoint} = this.state;
-	//     //Very simply connect to the socket
-	//     const socket = socketIOClient(endpoint);
-	//     //Listen for data on the "outgoing data" namespace and supply a callback for what to do when we get one. In this case, we set a state variable
-	//     socket.on("outgoing data", data => console.log(data));
-	// }
+	componentDidMount() {
+		this.loadData();
+		this.interval = setInterval(() => {
+			this.loadData();
+		}, 1000);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.interval);
+	}
+
+	async loadData() {
+		const { endpoint } = this.state;
+		try {
+			const res = await fetch(endpoint);
+			const blocks = await res.json();
+			const SOC = blocks.SOC;
+
+			this.setState({
+				SOC: SOC,
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	}
 
 	readFile = file => {
 		return new Promise(resolve => {
@@ -96,18 +114,6 @@ class Main extends Component {
 
 	testRequest = () => {
 		console.log('yu');
-		axios({
-			method: 'post',
-			url: 'http://localhost:8080/',
-			data: {
-				soc: 'Finn',
-			},
-		});
-
-		//   axios.get('http://127.0.0.1:8080/')
-		//   .then(response => {
-		//     console.log(response.data);
-		//   });
 	};
 
 	render() {
@@ -226,7 +232,7 @@ class Main extends Component {
 										</Grid.Column>
 										<Grid.Column>
 											<Label size="big" basic pointing="below">
-												SOC2
+												Current Distance
 											</Label>
 											<br />
 											<Label basic size="massive">
