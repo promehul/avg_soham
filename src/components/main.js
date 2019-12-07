@@ -15,15 +15,15 @@ class Main extends Component {
 			mapImageTemp: '',
 			safeDistance: 10,
 			active: true,
-			SOC: '23',
-			SOC2: '123123',
-			TDT: 'powi0',
+			SOC: '98',
+			SOC2: '6',
+			TDT: '0.3',
 			openOverrideDialogue: false,
 			allowOverride: false,
 			time: '10:00',
 			frequency: 0,
 			installationMode: false,
-			endpoint: 'http://127.0.0.1:8080',
+			endpoint: 'http://10.42.0.68:8080',
 		};
 		this.readFile = this.readFile.bind(this);
 	}
@@ -45,9 +45,14 @@ class Main extends Component {
 			const res = await fetch(endpoint);
 			const blocks = await res.json();
 			const SOC = blocks.SOC;
+			const SOC2 = blocks.current_distance;
+			const TDT = blocks.speed;
+			console.log(blocks);
 
 			this.setState({
 				SOC: SOC,
+				SOC2: SOC2,
+				TDT: TDT,
 			});
 		} catch (e) {
 			console.log(e);
@@ -119,6 +124,12 @@ class Main extends Component {
 	render() {
 		return (
 			<div>
+				<Container fluid>
+					<Image.Group size="tiny">
+						<Image floated="left" src={process.env.PUBLIC_URL + 'tetrahedron_logo.png'} />;
+						<Image floated="right" src={process.env.PUBLIC_URL + 'iitr_logo.png'} />;
+					</Image.Group>
+				</Container>
 				<Grid columns={2} divided stackable>
 					<Grid.Column>
 						<Grid.Row>
@@ -223,7 +234,7 @@ class Main extends Component {
 									<Grid.Row>
 										<Grid.Column>
 											<Label size="big" basic pointing="below">
-												SOC
+												Battery
 											</Label>
 											<br />
 											<Label basic color={this.checkColor(this.state.SOC)} size="massive">
@@ -249,7 +260,7 @@ class Main extends Component {
 										</Grid.Column>
 										<Grid.Column>
 											<Label size="big" basic pointing="below">
-												TDT
+												Speed
 											</Label>
 											<br />
 											<Label basic size="massive">
